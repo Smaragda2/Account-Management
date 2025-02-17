@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TransactionService {
     private final TransactionRepository transactionRepository;
-    private final AccountService accountService;
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MM/dd/yy");
 
@@ -32,21 +31,21 @@ public class TransactionService {
                 .collect(Collectors.toConcurrentMap(Transaction::getTransactionId, Function.identity()));
     }
 
-    public List<Transaction> getTransactionsByBeneficiaryId(String beneficiaryId) {
-        return transactionsMap.values().stream()
-                .filter(transaction -> accountService.getAccountsByBeneficiaryId(beneficiaryId).stream()
-                        .anyMatch(account -> account.getAccountId().equals(transaction.getAccountId())))
-                .toList();
-    }
-
     public List<Transaction> getTransactionsByAccountId(String accountId) {
         return transactionsMap.values().stream()
                 .filter(transaction -> transaction.getAccountId().equals(accountId))
                 .toList();
     }
 
-    public double getMaxWithdrawalLastMonth(String beneficiaryId) {
-        return getTransactionsByBeneficiaryId(beneficiaryId).stream()
+    public List<Transaction> getTransactionsByAccountIds(List<String> accountIds) {
+        return transactionsMap.values().stream()
+                .filter(transaction -> accountIds.contains(transaction.getAccountId()))
+                .toList();
+    }
+
+    public double getMaxWithdrawalLastMonth(List<String> accountIds) {
+        return transactionsMap.values().stream()
+                .filter(transaction -> accountIds.contains(transaction.getAccountId()))
                 .filter(transaction -> transaction.getType() == TransactionType.WITHDRAWAL)
                 .filter(transaction -> isLastMonth(transaction.getDate()))
                 .mapToDouble(Transaction::getAmount)

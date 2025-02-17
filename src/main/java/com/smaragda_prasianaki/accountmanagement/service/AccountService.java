@@ -1,5 +1,6 @@
 package com.smaragda_prasianaki.accountmanagement.service;
 
+import com.smaragda_prasianaki.accountmanagement.AccountBalanceDTO;
 import com.smaragda_prasianaki.accountmanagement.model.Account;
 import com.smaragda_prasianaki.accountmanagement.model.TransactionType;
 import com.smaragda_prasianaki.accountmanagement.repository.AccountRepository;
@@ -34,12 +35,15 @@ public class AccountService {
                 .toList();
     }
 
-    public double getTotalBalanceByBeneficiaryId(String beneficiaryId) {
+    public List<AccountBalanceDTO> getBalancesByBeneficiaryId(String beneficiaryId) {
         return getAccountsByBeneficiaryId(beneficiaryId).stream()
-                .mapToDouble(account -> transactionService.getTransactionsByAccountId(account.getAccountId()).stream()
-                        .mapToDouble(transaction -> transaction.getType() == TransactionType.DEPOSIT ? transaction.getAmount() : -transaction.getAmount())
-                        .sum())
-                .sum();
+                .map(account -> new AccountBalanceDTO(account.getAccountId(), calculateBalanceForAccount(account.getAccountId())))
+                .toList();
     }
 
+    private double calculateBalanceForAccount(String accountId) {
+        return transactionService.getTransactionsByAccountId(accountId).stream()
+                .mapToDouble(transaction -> transaction.getType() == TransactionType.DEPOSIT ? transaction.getAmount() : -transaction.getAmount())
+                .sum();
+    }
 }

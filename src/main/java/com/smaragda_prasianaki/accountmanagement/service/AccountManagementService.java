@@ -1,5 +1,6 @@
 package com.smaragda_prasianaki.accountmanagement.service;
 
+import com.smaragda_prasianaki.accountmanagement.AccountBalanceDTO;
 import com.smaragda_prasianaki.accountmanagement.model.Account;
 import com.smaragda_prasianaki.accountmanagement.model.Beneficiary;
 import com.smaragda_prasianaki.accountmanagement.model.Transaction;
@@ -24,14 +25,20 @@ public class AccountManagementService {
     }
 
     public List<Transaction> getTransactionsByBeneficiaryId(String beneficiaryId) {
-        return transactionService.getTransactionsByBeneficiaryId(beneficiaryId);
+        return transactionService.getTransactionsByAccountIds(getAccountIdsByBeneficiaryId(beneficiaryId));
     }
 
-    public double getTotalBalanceByBeneficiaryId(String beneficiaryId) {
-        return accountService.getTotalBalanceByBeneficiaryId(beneficiaryId);
+    public List<AccountBalanceDTO> getBalancesByBeneficiaryId(String beneficiaryId) {
+        return accountService.getBalancesByBeneficiaryId(beneficiaryId);
     }
 
     public double getMaxWithdrawalLastMonth(String beneficiaryId) {
-        return transactionService.getMaxWithdrawalLastMonth(beneficiaryId);
+        return transactionService.getMaxWithdrawalLastMonth(getAccountIdsByBeneficiaryId(beneficiaryId));
+    }
+
+    private List<String> getAccountIdsByBeneficiaryId(String beneficiaryId) {
+        return accountService.getAccountsByBeneficiaryId(beneficiaryId).stream()
+                .map(Account::getAccountId)
+                .toList();
     }
 }
