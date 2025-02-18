@@ -11,11 +11,16 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class AccountManagementService {
     private final BeneficiaryService beneficiaryService;
     private final AccountService accountService;
     private final TransactionService transactionService;
+
+    public AccountManagementService(BeneficiaryService beneficiaryService, AccountService accountService, TransactionService transactionService) {
+        this.beneficiaryService = beneficiaryService;
+        this.accountService = accountService;
+        this.transactionService = transactionService;
+    }
 
     public Beneficiary getBeneficiaryById(String beneficiaryId) {
         return beneficiaryService.getBeneficiaryById(beneficiaryId);

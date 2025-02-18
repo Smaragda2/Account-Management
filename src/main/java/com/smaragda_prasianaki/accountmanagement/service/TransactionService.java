@@ -4,6 +4,7 @@ import com.smaragda_prasianaki.accountmanagement.model.Transaction;
 import com.smaragda_prasianaki.accountmanagement.model.TransactionType;
 import com.smaragda_prasianaki.accountmanagement.repository.TransactionRepository;
 import jakarta.annotation.PostConstruct;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,9 +17,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class TransactionService {
     private final TransactionRepository transactionRepository;
+    public TransactionService(TransactionRepository transactionRepository) {
+        this.transactionRepository = transactionRepository;
+    }
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MM/dd/yy");
 

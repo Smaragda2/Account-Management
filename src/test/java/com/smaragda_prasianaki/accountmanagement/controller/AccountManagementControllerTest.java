@@ -8,10 +8,11 @@ import com.smaragda_prasianaki.accountmanagement.model.TransactionType;
 import com.smaragda_prasianaki.accountmanagement.service.AccountManagementService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.MockitoAnnotations;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -23,18 +24,17 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(AccountManagementController.class)
+@ExtendWith(MockitoExtension.class)
 public class AccountManagementControllerTest {
     @Autowired
     private MockMvc mockMvc;
-    @InjectMocks
+    @Mock
     private AccountManagementService accountManagementService;
     @InjectMocks
     private AccountManagementController accountManagementController;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
         mockMvc = MockMvcBuilders.standaloneSetup(accountManagementController).build();
     }
 
@@ -96,7 +96,7 @@ public class AccountManagementControllerTest {
                 .andExpect(jsonPath("$[1].transactionId").value("2"))
                 .andExpect(jsonPath("$[1].accountId").value("1"))
                 .andExpect(jsonPath("$[2].transactionId").value("3"))
-                .andExpect(jsonPath("$[1].accountId").value("2"));
+                .andExpect(jsonPath("$[2].accountId").value("2"));
     }
 
     @Test
@@ -129,7 +129,7 @@ public class AccountManagementControllerTest {
                 .thenReturn(maxWithdrawal);
 
         // Act & Assert
-        mockMvc.perform(get("/api/beneficiaries/{beneficiaryId}/transactions/maxWithdrawalLastMonth", beneficiaryId)
+        mockMvc.perform(get("/api/beneficiaries/{beneficiaryId}/transactions/maxWithdrawLastMonth", beneficiaryId)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().string("75.0"));

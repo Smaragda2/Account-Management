@@ -12,9 +12,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class BeneficiaryService {
     private final BeneficiaryRepository beneficiaryRepository;
+    public BeneficiaryService(BeneficiaryRepository beneficiaryRepository) {
+        this.beneficiaryRepository = beneficiaryRepository;
+    }
 
     private ConcurrentMap<String, Beneficiary> beneficiariesMap = new ConcurrentHashMap<>();
 
