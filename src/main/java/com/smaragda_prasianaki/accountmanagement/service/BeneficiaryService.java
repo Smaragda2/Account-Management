@@ -3,7 +3,6 @@ package com.smaragda_prasianaki.accountmanagement.service;
 import com.smaragda_prasianaki.accountmanagement.model.Beneficiary;
 import com.smaragda_prasianaki.accountmanagement.repository.BeneficiaryRepository;
 import jakarta.annotation.PostConstruct;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.ConcurrentHashMap;
