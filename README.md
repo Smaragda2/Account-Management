@@ -171,3 +171,20 @@ To run the unit tests, use the following command:
 ```bash
 mvn test
 ```
+
+---
+
+## API Documentation
+
+This project includes **Swagger UI** for easy API exploration.
+
+### Access the Swagger UI
+
+1. Start the application:
+   ```bash
+   mvn spring-boot:run
+    ```
+2. Open your browser and navigate to:
+   ```bash
+   http://localhost:8080/swagger-ui.html
+   ```
