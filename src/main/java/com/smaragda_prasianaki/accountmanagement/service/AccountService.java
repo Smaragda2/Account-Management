@@ -15,10 +15,13 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class AccountService {
     private final AccountRepository accountRepository;
     private final TransactionService transactionService;
+    public AccountService(AccountRepository accountRepository, TransactionService transactionService) {
+        this.accountRepository = accountRepository;
+        this.transactionService = transactionService;
+    }
 
     private ConcurrentMap<String, Account> accountsMap = new ConcurrentHashMap<>();
 
