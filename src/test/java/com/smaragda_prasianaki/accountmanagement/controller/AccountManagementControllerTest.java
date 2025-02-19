@@ -1,6 +1,8 @@
 package com.smaragda_prasianaki.accountmanagement.controller;
 
-import com.smaragda_prasianaki.accountmanagement.AccountBalanceDTO;
+import com.smaragda_prasianaki.accountmanagement.dto.AccountBalanceDTO;
+import com.smaragda_prasianaki.accountmanagement.dto.BalanceDTO;
+import com.smaragda_prasianaki.accountmanagement.dto.MaxWithdrawDTO;
 import com.smaragda_prasianaki.accountmanagement.model.Account;
 import com.smaragda_prasianaki.accountmanagement.model.Beneficiary;
 import com.smaragda_prasianaki.accountmanagement.model.Transaction;
@@ -17,21 +19,26 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
-public class AccountManagementControllerTest {
+class AccountManagementControllerTest {
     @Autowired
     private MockMvc mockMvc;
     @Mock
     private AccountManagementService accountManagementService;
     @InjectMocks
     private AccountManagementController accountManagementController;
+
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MM/dd/yy");
 
     @BeforeEach
     void setUp() {
@@ -50,9 +57,9 @@ public class AccountManagementControllerTest {
         // Act & Assert
         mockMvc.perform(get("/api/beneficiaries/{beneficiaryId}", beneficiaryId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.beneficiaryId").value(beneficiaryId))
-                .andExpect(jsonPath("$.firstName").value("John"))
-                .andExpect(jsonPath("$.lastName").value("Doe"));
+                .andExpect(jsonPath("$.beneficiaryId").value(beneficiary.getBeneficiaryId()))
+                .andExpect(jsonPath("$.firstName").value(beneficiary.getFirstName()))
+                .andExpect(jsonPath("$.lastName").value(beneficiary.getLastName()));
     }
 
     @Test
@@ -70,10 +77,10 @@ public class AccountManagementControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[0].accountId").value("1"))
-                .andExpect(jsonPath("$[0].beneficiaryId").value(beneficiaryId))
-                .andExpect(jsonPath("$[1].accountId").value("2"))
-                .andExpect(jsonPath("$[1].beneficiaryId").value(beneficiaryId));
+                .andExpect(jsonPath("$[0].accountId").value(account1.getAccountId()))
+                .andExpect(jsonPath("$[0].beneficiaryId").value(account1.getBeneficiaryId()))
+                .andExpect(jsonPath("$[1].accountId").value(account2.getAccountId()))
+                .andExpect(jsonPath("$[1].beneficiaryId").value(account2.getBeneficiaryId()));
     }
 
     @Test
@@ -91,12 +98,12 @@ public class AccountManagementControllerTest {
         mockMvc.perform(get("/api/beneficiaries/{beneficiaryId}/transactions", beneficiaryId)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].transactionId").value("1"))
-                .andExpect(jsonPath("$[0].accountId").value("1"))
-                .andExpect(jsonPath("$[1].transactionId").value("2"))
-                .andExpect(jsonPath("$[1].accountId").value("1"))
-                .andExpect(jsonPath("$[2].transactionId").value("3"))
-                .andExpect(jsonPath("$[2].accountId").value("2"));
+                .andExpect(jsonPath("$[0].transactionId").value(transaction1.getTransactionId()))
+                .andExpect(jsonPath("$[0].accountId").value(transaction1.getAccountId()))
+                .andExpect(jsonPath("$[1].transactionId").value(transaction2.getTransactionId()))
+                .andExpect(jsonPath("$[1].accountId").value(transaction2.getAccountId()))
+                .andExpect(jsonPath("$[2].transactionId").value(transaction3.getTransactionId()))
+                .andExpect(jsonPath("$[2].accountId").value(transaction3.getAccountId()));
     }
 
     @Test
@@ -105,33 +112,38 @@ public class AccountManagementControllerTest {
         String beneficiaryId = "1";
         AccountBalanceDTO balance1 = new AccountBalanceDTO("1", 50.0);
         AccountBalanceDTO balance2 = new AccountBalanceDTO("2", 125.0);
+        BalanceDTO balanceDTO = new BalanceDTO(List.of(balance1, balance2), 175.0);
 
         when(accountManagementService.getBalancesByBeneficiaryId(beneficiaryId))
-                .thenReturn(List.of(balance1, balance2));
+                .thenReturn(balanceDTO);
 
         // Act & Assert
         mockMvc.perform(get("/api/beneficiaries/{beneficiaryId}/balance", beneficiaryId)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].accountId").value("1"))
-                .andExpect(jsonPath("$[0].balance").value(50.0))
-                .andExpect(jsonPath("$[1].accountId").value("2"))
-                .andExpect(jsonPath("$[1].balance").value(125.0));
+                .andExpect(jsonPath("$.accountBalances[0].accountId").value(balance1.getAccountId()))
+                .andExpect(jsonPath("$.accountBalances[0].balance").value(balance1.getBalance()))
+                .andExpect(jsonPath("$.accountBalances[1].accountId").value(balance2.getAccountId()))
+                .andExpect(jsonPath("$.accountBalances[1].balance").value(balance2.getBalance()))
+                .andExpect(jsonPath("$.totalBalance").value(balanceDTO.getTotalBalance()));
     }
 
     @Test
     void testGetMaxWithdrawalLastMonth() throws Exception {
         // Arrange
         String beneficiaryId = "1";
-        double maxWithdrawal = 75.0;
+        String lastMonthDate = LocalDate.now().minusMonths(1).format(DATE_FORMATTER);
+
+        MaxWithdrawDTO maxWithdrawDTO = new MaxWithdrawDTO(75.0, lastMonthDate);
 
         when(accountManagementService.getMaxWithdrawalLastMonth(beneficiaryId))
-                .thenReturn(maxWithdrawal);
+                .thenReturn(maxWithdrawDTO);
 
         // Act & Assert
         mockMvc.perform(get("/api/beneficiaries/{beneficiaryId}/transactions/maxWithdrawLastMonth", beneficiaryId)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().string("75.0"));
+                .andExpect(jsonPath("$.maxWithdraw").value(maxWithdrawDTO.getMaxWithdraw()))
+                .andExpect(jsonPath("$.date").value(maxWithdrawDTO.getDate()));
     }
 }

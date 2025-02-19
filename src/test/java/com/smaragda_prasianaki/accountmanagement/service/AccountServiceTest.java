@@ -1,6 +1,6 @@
 package com.smaragda_prasianaki.accountmanagement.service;
 
-import com.smaragda_prasianaki.accountmanagement.AccountBalanceDTO;
+import com.smaragda_prasianaki.accountmanagement.dto.BalanceDTO;
 import com.smaragda_prasianaki.accountmanagement.model.Account;
 import com.smaragda_prasianaki.accountmanagement.model.Transaction;
 import com.smaragda_prasianaki.accountmanagement.model.TransactionType;
@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class AccountServiceTest {
+class AccountServiceTest {
     @Mock
     private AccountRepository accountRepository;
     @Mock
@@ -70,13 +70,14 @@ public class AccountServiceTest {
         accountService.loadData();
 
         // Act
-        List<AccountBalanceDTO> balances = accountService.getBalancesByBeneficiaryId(beneficiaryId1);
+        BalanceDTO balance = accountService.getBalancesByBeneficiaryId(beneficiaryId1);
 
         // Assert
-        assertThat(balances).hasSize(2);
-        assertThat(balances.get(0).getAccountId()).isEqualTo("1");
-        assertThat(balances.get(0).getBalance()).isEqualTo(50.0); // 100 - 50
-        assertThat(balances.get(1).getAccountId()).isEqualTo("2");
-        assertThat(balances.get(1).getBalance()).isEqualTo(200.0); // 200
+        assertThat(balance.getAccountBalances()).hasSize(2);
+        assertThat(balance.getAccountBalances().get(0).getAccountId()).isEqualTo(accountId1);
+        assertThat(balance.getAccountBalances().get(0).getBalance()).isEqualTo(50.0); // 100 - 50
+        assertThat(balance.getAccountBalances().get(1).getAccountId()).isEqualTo(accountId2);
+        assertThat(balance.getAccountBalances().get(1).getBalance()).isEqualTo(200.0); // 200
+        assertThat(balance.getTotalBalance()).isEqualTo(250.0);
     }
 }

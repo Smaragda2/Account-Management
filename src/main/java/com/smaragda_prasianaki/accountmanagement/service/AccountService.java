@@ -1,11 +1,11 @@
 package com.smaragda_prasianaki.accountmanagement.service;
 
-import com.smaragda_prasianaki.accountmanagement.AccountBalanceDTO;
+import com.smaragda_prasianaki.accountmanagement.dto.AccountBalanceDTO;
+import com.smaragda_prasianaki.accountmanagement.dto.BalanceDTO;
 import com.smaragda_prasianaki.accountmanagement.model.Account;
 import com.smaragda_prasianaki.accountmanagement.model.TransactionType;
 import com.smaragda_prasianaki.accountmanagement.repository.AccountRepository;
 import jakarta.annotation.PostConstruct;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -38,10 +38,16 @@ public class AccountService {
                 .toList();
     }
 
-    public List<AccountBalanceDTO> getBalancesByBeneficiaryId(String beneficiaryId) {
-        return getAccountsByBeneficiaryId(beneficiaryId).stream()
+    public BalanceDTO getBalancesByBeneficiaryId(String beneficiaryId) {
+        List<AccountBalanceDTO> accountBalanceDTOS = getAccountsByBeneficiaryId(beneficiaryId).stream()
                 .map(account -> new AccountBalanceDTO(account.getAccountId(), calculateBalanceForAccount(account.getAccountId())))
                 .toList();
+
+        double totalBalance = accountBalanceDTOS.stream()
+                .mapToDouble(AccountBalanceDTO::getBalance)
+                .sum();
+
+        return new BalanceDTO(accountBalanceDTOS, totalBalance);
     }
 
     private double calculateBalanceForAccount(String accountId) {

@@ -1,24 +1,27 @@
 package com.smaragda_prasianaki.accountmanagement.service;
 
-import com.smaragda_prasianaki.accountmanagement.AccountBalanceDTO;
+import com.smaragda_prasianaki.accountmanagement.dto.AccountBalanceDTO;
+import com.smaragda_prasianaki.accountmanagement.dto.BalanceDTO;
+import com.smaragda_prasianaki.accountmanagement.dto.MaxWithdrawDTO;
 import com.smaragda_prasianaki.accountmanagement.model.Account;
 import com.smaragda_prasianaki.accountmanagement.model.Beneficiary;
 import com.smaragda_prasianaki.accountmanagement.model.Transaction;
 import com.smaragda_prasianaki.accountmanagement.model.TransactionType;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class AccountManagementServiceTest {
+class AccountManagementServiceTest {
     @Mock
     private AccountService accountService;
     @Mock
@@ -28,6 +31,8 @@ public class AccountManagementServiceTest {
 
     @InjectMocks
     private AccountManagementService accountManagementService;
+
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MM/dd/yy");
 
     String beneficiaryId = "1";
     Beneficiary beneficiary = new Beneficiary(beneficiaryId, "John", "Doe");
@@ -59,8 +64,8 @@ public class AccountManagementServiceTest {
 
         // Assert
         assertThat(accounts).hasSize(2);
-        assertThat(accounts.get(0).getAccountId()).isEqualTo("1");
-        assertThat(accounts.get(1).getAccountId()).isEqualTo("2");
+        assertThat(accounts.get(0).getAccountId()).isEqualTo(account1.getAccountId());
+        assertThat(accounts.get(1).getAccountId()).isEqualTo(account2.getAccountId());
         verify(accountService, times(1)).getAccountsByBeneficiaryId(beneficiaryId);
     }
 
@@ -73,35 +78,41 @@ public class AccountManagementServiceTest {
 
         // Assert
         assertThat(transactions).hasSize(2);
-        assertThat(transactions.get(0).getTransactionId()).isEqualTo("1");
-        assertThat(transactions.get(1).getTransactionId()).isEqualTo("2");
+        assertThat(transactions.get(0).getTransactionId()).isEqualTo(transaction1.getTransactionId());
+        assertThat(transactions.get(1).getTransactionId()).isEqualTo(transaction2.getTransactionId());
         verify(transactionService, times(1)).getTransactionsByAccountIds(accountIds);
     }
 
     @Test
     void testGetBalancesByBeneficiaryId() {
-        when(accountService.getBalancesByBeneficiaryId(beneficiaryId)).thenReturn(List.of(balance1, balance2));
+        BalanceDTO balanceDTO = new BalanceDTO(List.of(balance1, balance2), balance1.getBalance() + balance2.getBalance());
+        when(accountService.getBalancesByBeneficiaryId(beneficiaryId)).thenReturn(balanceDTO);
 
-        List<AccountBalanceDTO> balances = accountManagementService.getBalancesByBeneficiaryId(beneficiaryId);
+        BalanceDTO balance = accountManagementService.getBalancesByBeneficiaryId(beneficiaryId);
 
         // Assert
-        assertThat(balances).hasSize(2);
-        assertThat(balances.get(0).getAccountId()).isEqualTo("1");
-        assertThat(balances.get(0).getBalance()).isEqualTo(50.0);
-        assertThat(balances.get(1).getAccountId()).isEqualTo("2");
-        assertThat(balances.get(1).getBalance()).isEqualTo(125.0);
+        assertThat(balance.getAccountBalances()).hasSize(2);
+        assertThat(balance.getAccountBalances().get(0).getAccountId()).isEqualTo(balance1.getAccountId());
+        assertThat(balance.getAccountBalances().get(0).getBalance()).isEqualTo(balance1.getBalance());
+        assertThat(balance.getAccountBalances().get(1).getAccountId()).isEqualTo(balance2.getAccountId());
+        assertThat(balance.getAccountBalances().get(1).getBalance()).isEqualTo(balance2.getBalance());
+        assertThat(balance.getTotalBalance()).isEqualTo(balance1.getBalance() + balance2.getBalance());
         verify(accountService, times(1)).getBalancesByBeneficiaryId(beneficiaryId);
     }
 
     @Test
     void testGetMaxWithdrawalLastMonth() {
-        when(transactionService.getMaxWithdrawalLastMonth(accountIds)).thenReturn(200.0);
+        String lastMonthDate = LocalDate.now().minusMonths(1).format(DATE_FORMATTER);
+        MaxWithdrawDTO maxWithdrawDTO = new MaxWithdrawDTO(200.0, lastMonthDate);
+
+        when(transactionService.getMaxWithdrawalLastMonth(accountIds, beneficiaryId)).thenReturn(maxWithdrawDTO);
         when(accountService.getAccountsByBeneficiaryId(beneficiaryId)).thenReturn(List.of(account1, account2));
 
-        double maxWithdrawal = accountManagementService.getMaxWithdrawalLastMonth(beneficiaryId);
+        MaxWithdrawDTO maxWithdrawal = accountManagementService.getMaxWithdrawalLastMonth(beneficiaryId);
 
         // Assert
-        assertThat(maxWithdrawal).isEqualTo(200.0);
-        verify(transactionService, times(1)).getMaxWithdrawalLastMonth(accountIds);
+        assertThat(maxWithdrawal.getMaxWithdraw()).isEqualTo(maxWithdrawDTO.getMaxWithdraw());
+        assertThat(maxWithdrawal.getDate()).isEqualTo(maxWithdrawDTO.getDate());
+        verify(transactionService, times(1)).getMaxWithdrawalLastMonth(accountIds, beneficiaryId);
     }
 }

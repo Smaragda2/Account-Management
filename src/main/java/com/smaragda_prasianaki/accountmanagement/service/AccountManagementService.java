@@ -1,11 +1,10 @@
 package com.smaragda_prasianaki.accountmanagement.service;
 
-import com.smaragda_prasianaki.accountmanagement.AccountBalanceDTO;
+import com.smaragda_prasianaki.accountmanagement.dto.BalanceDTO;
+import com.smaragda_prasianaki.accountmanagement.dto.MaxWithdrawDTO;
 import com.smaragda_prasianaki.accountmanagement.model.Account;
 import com.smaragda_prasianaki.accountmanagement.model.Beneficiary;
 import com.smaragda_prasianaki.accountmanagement.model.Transaction;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -34,12 +33,12 @@ public class AccountManagementService {
         return transactionService.getTransactionsByAccountIds(getAccountIdsByBeneficiaryId(beneficiaryId));
     }
 
-    public List<AccountBalanceDTO> getBalancesByBeneficiaryId(String beneficiaryId) {
+    public BalanceDTO getBalancesByBeneficiaryId(String beneficiaryId) {
         return accountService.getBalancesByBeneficiaryId(beneficiaryId);
     }
 
-    public double getMaxWithdrawalLastMonth(String beneficiaryId) {
-        return transactionService.getMaxWithdrawalLastMonth(getAccountIdsByBeneficiaryId(beneficiaryId));
+    public MaxWithdrawDTO getMaxWithdrawalLastMonth(String beneficiaryId) {
+        return transactionService.getMaxWithdrawalLastMonth(getAccountIdsByBeneficiaryId(beneficiaryId), beneficiaryId);
     }
 
     private List<String> getAccountIdsByBeneficiaryId(String beneficiaryId) {

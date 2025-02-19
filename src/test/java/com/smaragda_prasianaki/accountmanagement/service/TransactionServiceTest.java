@@ -1,5 +1,7 @@
 package com.smaragda_prasianaki.accountmanagement.service;
 
+import com.smaragda_prasianaki.accountmanagement.dto.MaxWithdrawDTO;
+import com.smaragda_prasianaki.accountmanagement.exception.NoTransactionsFoundException;
 import com.smaragda_prasianaki.accountmanagement.model.Transaction;
 import com.smaragda_prasianaki.accountmanagement.model.TransactionType;
 import com.smaragda_prasianaki.accountmanagement.repository.TransactionRepository;
@@ -16,10 +18,11 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class TransactionServiceTest {
+class TransactionServiceTest {
     @Mock
     private TransactionRepository transactionRepository;
     @InjectMocks
@@ -83,10 +86,11 @@ public class TransactionServiceTest {
         transactionService.loadData();
 
         // Act
-        double maxWithdrawal = transactionService.getMaxWithdrawalLastMonth(List.of(accountId1, accountId2, accountId3));
+        MaxWithdrawDTO maxWithdrawal = transactionService.getMaxWithdrawalLastMonth(List.of(accountId1, accountId2, accountId3), "1");
 
         // Assert
-        assertThat(maxWithdrawal).isEqualTo(300.0);
+        assertThat(maxWithdrawal.getMaxWithdraw()).isEqualTo(transaction4.getAmount());
+        assertThat(maxWithdrawal.getDate()).isEqualTo(transaction4.getDate());
     }
 
     @Test
@@ -98,12 +102,16 @@ public class TransactionServiceTest {
 
         // Manually call loadData() after setting up the mock
         transactionService.loadData();
+        List<String> accountIdsNoWithdraw = List.of(accountId1, accountId2, accountId3);
 
         // Act
-        double maxWithdrawal = transactionService.getMaxWithdrawalLastMonth(List.of(accountId1, accountId2, accountId3));
+        NoTransactionsFoundException exception = assertThrows(
+                NoTransactionsFoundException.class,
+                () -> transactionService.getMaxWithdrawalLastMonth(accountIdsNoWithdraw, "1")
+        );
 
         // Assert
-        assertThat(maxWithdrawal).isEqualTo(0.0);
+        assertThat(exception.getMessage()).isEqualTo(NoTransactionsFoundException.ERROR_MESSAGE + "1");
     }
 
     @Test

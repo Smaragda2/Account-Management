@@ -1,4 +1,4 @@
-package com.smaragda_prasianaki.accountmanagement;
+package com.smaragda_prasianaki.accountmanagement.dto;
 
 import lombok.Data;
 

@@ -1,11 +1,11 @@
 package com.smaragda_prasianaki.accountmanagement.controller;
 
-import com.smaragda_prasianaki.accountmanagement.AccountBalanceDTO;
+import com.smaragda_prasianaki.accountmanagement.dto.BalanceDTO;
+import com.smaragda_prasianaki.accountmanagement.dto.MaxWithdrawDTO;
 import com.smaragda_prasianaki.accountmanagement.model.Account;
 import com.smaragda_prasianaki.accountmanagement.model.Beneficiary;
 import com.smaragda_prasianaki.accountmanagement.model.Transaction;
 import com.smaragda_prasianaki.accountmanagement.service.AccountManagementService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,9 +15,12 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/beneficiaries")
-@RequiredArgsConstructor
 public class AccountManagementController {
     private final AccountManagementService accountManagementService;
+
+    public AccountManagementController(AccountManagementService accountManagementService) {
+        this.accountManagementService = accountManagementService;
+    }
 
     @GetMapping("/{beneficiaryId}")
     public Beneficiary getBeneficiary(@PathVariable String beneficiaryId) {
@@ -35,12 +38,12 @@ public class AccountManagementController {
     }
 
     @GetMapping("/{beneficiaryId}/balance")
-    public List<AccountBalanceDTO> getBalancesByBeneficiaryId(@PathVariable String beneficiaryId) {
+    public BalanceDTO getBalancesByBeneficiaryId(@PathVariable String beneficiaryId) {
         return accountManagementService.getBalancesByBeneficiaryId(beneficiaryId);
     }
 
     @GetMapping("/{beneficiaryId}/transactions/maxWithdrawLastMonth")
-    public double getMaxWithdrawalLastMonth(@PathVariable String beneficiaryId) {
+    public MaxWithdrawDTO getMaxWithdrawalLastMonth(@PathVariable String beneficiaryId) {
         return accountManagementService.getMaxWithdrawalLastMonth(beneficiaryId);
     }
 }
