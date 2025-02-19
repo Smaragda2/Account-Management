@@ -1,15 +1,16 @@
 package com.smaragda_prasianaki.accountmanagement.service;
 
+import com.smaragda_prasianaki.accountmanagement.dto.MaxWithdrawDTO;
+import com.smaragda_prasianaki.accountmanagement.exception.NoTransactionsFoundException;
 import com.smaragda_prasianaki.accountmanagement.model.Transaction;
 import com.smaragda_prasianaki.accountmanagement.model.TransactionType;
 import com.smaragda_prasianaki.accountmanagement.repository.TransactionRepository;
 import jakarta.annotation.PostConstruct;
-import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -46,14 +47,14 @@ public class TransactionService {
                 .toList();
     }
 
-    public double getMaxWithdrawalLastMonth(List<String> accountIds) {
+    public MaxWithdrawDTO getMaxWithdrawalLastMonth(List<String> accountIds, String beneficiaryId) {
         return transactionsMap.values().stream()
                 .filter(transaction -> accountIds.contains(transaction.getAccountId()))
                 .filter(transaction -> transaction.getType() == TransactionType.WITHDRAWAL)
                 .filter(transaction -> isLastMonth(transaction.getDate()))
-                .mapToDouble(Transaction::getAmount)
-                .max()
-                .orElse(0.0);
+                .max(Comparator.comparing(Transaction::getAmount))
+                .map(transaction -> new MaxWithdrawDTO(transaction.getAmount(), transaction.getDate()))
+                .orElseThrow(() -> new NoTransactionsFoundException(beneficiaryId));
     }
 
     private boolean isLastMonth(String date) {
