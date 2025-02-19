@@ -13,6 +13,7 @@ The system reads data from CSV files and exposes it through a RESTful API.
 3. [API Endpoints](#api-endpoints)
 4. [Running the Application](#running-the-application)
 5. [Testing](#testing)
+6. [Swagger UI](#access-the-swagger-ui)
 
 ---
 
@@ -51,12 +52,26 @@ The system reads data from CSV files and exposes it through a RESTful API.
    ```
 
 ---
+## API Documentation
 
-## API Endpoints
+This project includes **Swagger UI** for easy API exploration.
+
+### Access the Swagger UI
+
+1. Start the application:
+   ```bash
+   mvn spring-boot:run
+    ```
+2. Open your browser and navigate to:
+   ```bash
+   http://localhost:8080/swagger-ui.html
+   ```
+   
+### API Endpoints
 
 The following REST APIs are available:
 
-### 1. Get Beneficiary Details
+#### 1. Get Beneficiary Details
 - **Endpoint**: `GET /api/beneficiaries/{beneficiaryId}`
 - **Description**: Retrieve details of a beneficiary by ID.
 - **Example Response**:
@@ -68,7 +83,7 @@ The following REST APIs are available:
   }
   ```
 
-### 2. Get Accounts for a Beneficiary
+#### 2. Get Accounts for a Beneficiary
 - **Endpoint**: `GET /api/beneficiaries/{beneficiaryId}/accounts`
 - **Description**: Retrieve all accounts associated with a beneficiary.
 - **Example Response**:
@@ -85,7 +100,7 @@ The following REST APIs are available:
   ]
   ```
 
-### 3. Get Transactions for a Beneficiary
+#### 3. Get Transactions for a Beneficiary
 - **Endpoint**: `GET /api/beneficiaries/{beneficiaryId}/transactions`
 - **Description**: Retrieve all transactions for a beneficiary.
 - **Example Response**:
@@ -108,7 +123,7 @@ The following REST APIs are available:
   ]
   ```
 
-### 4. Get Balances for a Beneficiary
+#### 4. Get Balances for a Beneficiary
 - **Endpoint**: `GET /api/beneficiaries/{beneficiaryId}/balance`
 - **Description**: Retrieve the balances for each account of a beneficiary and the total balance of all the accoutns.
 - **Example Response**:
@@ -128,7 +143,7 @@ The following REST APIs are available:
   }
   ```
 
-### 5. Get Maximum Withdrawal in the Last Month
+#### 5. Get Maximum Withdrawal in the Last Month
 - **Endpoint**: `GET /api/beneficiaries/{beneficiaryId}/transactions/maxWithdrawalLastMonth`
 - **Description**: Retrieve the maximum withdrawal amount for a beneficiary in the last month.
 - **Example Response**:
@@ -171,20 +186,3 @@ To run the unit tests, use the following command:
 ```bash
 mvn test
 ```
-
----
-
-## API Documentation
-
-This project includes **Swagger UI** for easy API exploration.
-
-### Access the Swagger UI
-
-1. Start the application:
-   ```bash
-   mvn spring-boot:run
-    ```
-2. Open your browser and navigate to:
-   ```bash
-   http://localhost:8080/swagger-ui.html
-   ```
